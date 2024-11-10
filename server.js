@@ -29,5 +29,23 @@ app.get("/chat", (req, res) => {
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.warn(chalk.blue("New client connected", socket.id));
+  // check if Client go online
+  console.warn("New client connected", socket.id);
+  socket.on("msg", (message) => {
+    console.log(message);
+    // send message to all clients (except the sender)
+    socket.broadcast.emit("msg", {
+      from: socket.id,
+      message,
+    });
+    // send message to only the sender
+    socket.emit("msg", {
+      from: socket.id,
+      message,
+    });
+  });
+  // check if Client go offline
+  socket.on("disconnect", () => {
+    console.warn("Client disconnected", socket.id);
+  });
 });
